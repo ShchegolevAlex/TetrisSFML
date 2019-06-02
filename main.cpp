@@ -11,9 +11,10 @@ const int N = 16;
 const int random (int N) {return rand()%7;}
 
 int field[M][N] = {0};
+int tempfield[M][N] = {0};
 
 struct Point
-{int x, y;} a[4], b[4], temp[4];
+{int x, y;} a[4], b[4], tempa[4], tempb[4];
 
 int figures[7][4] = 
 {
@@ -47,31 +48,6 @@ bool check()
 }
 
 
-static void viewtetraminno(int t)
-{
-
-	// int x = 3, y = 2;
-	// s.setPosition(x , y );//задаем позицию текста, центр камеры
-	// window.draw(s);//рисую этот текст 
-	// if (a[0].x == 0 && a[0].y == 0)
-		for (int i = 0; i < 4; i++)
-		{
-			temp[i].x = a[i].x;
-			temp[i].y = a[i].y;
-			temp[i].x = tempfigures[t][i] % 2;
-			temp[i].y = tempfigures[t][i] / 2;
-			// s.setPosition(x , y );//задаем позицию текста, центр камеры
-			// window.draw(s);//рисую этот текст 
-		}
-
-}
-
-
-
-
-
-
-
 
 
 int main()
@@ -80,15 +56,19 @@ int main()
 	Texture tiles;
 	Texture background;
 	Texture frame;
+	Texture tilesnext;
 	frame.loadFromFile("images/frame5.png");
 	background.loadFromFile("images/backgraund.jpg");
 	tiles.loadFromFile("images/tiles.png");
+	tilesnext.loadFromFile("images/tiles.png");
 
 	Sprite c(frame);
 
 	Sprite z(background);
 
 	Sprite s(tiles);
+
+	Sprite tn(tilesnext);
 	// s.setTextureRect(IntRect(0,0,18,18));
 
 	int dx = 5, colorNum = 1, dy = 0;
@@ -123,38 +103,7 @@ int main()
 				// else if (e.key.code == Keyboard::) window.close();
 		}
 
-
-
-
 		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;	
-
-
-
-
-
-		// viewtetraminno();
-		// s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
-		// window.draw(s);//рисую этот текст 
-
-				// int x = 3, y = 2;
-				// s.setPosition(x , y );//задаем позицию текста, центр камеры
-				// window.draw(s);//рисую этот текст 
-
-
-
-
-				// // window.draw(s);
-				// // int n = rand()%7;
-				// // for (int i = 0; i < 4; i++)
-				// // {
-				// // 	a[i + 1].x = figures[n + 1][i + 1] % 2;
-				// // 	a[i + 1].y = figures[n + 1][i + 1] / 2;
-
-				// // }
-
-
-
-
 
 		// Move
 
@@ -226,45 +175,224 @@ int main()
 			}
 
 
-		// viewtetraminno(n);
-		// s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
-		// window.draw(s);//рисую этот текст 
-		// window.clear();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+for (int i = 0; i < 4; i++)	tempfield[tempb[i].y][tempb[i].x] = colorNum;
 			
+				colorNum = 1 + rand()%7;
+				int n = rand()%7;
+				int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
+				shetrand = n;
+				if (a[4].x == 0 && a[4].y == 0)
+				for (int i = 0; i < 4; i++)
+				{
+					a[i].x = figures[n][i] % 2;
+					a[i].y = figures[n][i] / 2;
+					tempa[i].x = a[i].x;
+					tempa[i].y = a[i].y;
+					a[i].x = tempfigures[shetrand][i] % 2;
+					a[i].y = tempfigures[shetrand][i] / 2;
+					tempb[i].x = a[i].x;
+					tempb[i].y = a[i].y;
+
+				}
 
 
 
-		
-		// int n = 2;
-		int n = rand()%7;
-		int shetrand = n; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 
-		if (a[4].x == 0 && a[4].y == 0)
-		for (int i = 0; i < 4; i++)
-		{
-			a[i].x = figures[n][i] % 2;
-			a[i].y = figures[n][i] / 2;
-			// window.draw(s);
-			// s.setOrigin(-50, -50);
-			// s.setPosition(10,10);
-		}
+		// int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
+		// shetrand = n;
+		// if (a[4].x == 0 && a[4].y == 0)
+		// for (int i = 0; i < 4; i++)
+		// {
+		// 	a[i].x = figures[n][i] % 2;
+		// 	a[i].y = figures[n][i] / 2;
+		// 	tempa[i].x = a[i].x;
+		// 	tempa[i].y = a[i].y;
+		// 	a[i].x = tempfigures[shetrand][i] % 2;
+		// 	a[i].y = tempfigures[shetrand][i] / 2;
+		// 	tempb[i].x = a[i].x;
+		// 	tempb[i].y = a[i].y;
+		// 	// window.draw(s);
+		// 	// s.setOrigin(-50, -50);
+		// 	// s.setPosition(10,10);
+		// }
 
-		viewtetraminno(n);
+
+
+
+//Следующая тетрамина
+			//
+			// отрисовка следующей тетрамины
+			//
+			for (int i = 0; i < M; i++)
+			for (int j = 0; j < N; j++)
+			{
+				if (field[i][j] == 0) continue;
+				s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));//изменение цвета спрайта
+				s.setPosition(a[i].x * 18, a[i].y * 18);//обнуление позиции на нужное место
+				s.move(28,31);//выравнивание спрайтов 
+				// s.setPosition(j, i);//модулирование позиции на нужное место
+				// viewtetraminno(n);
+				// s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
+				window.draw(s);//рисую этот текст 
+				// window.draw(tn);
+			}
+
+
+
+
+		// viewtetraminno(n);
 		s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
-		window.draw(s);//рисую этот текст 
-		// window.clear();
-
+		window.draw(s);
+		window.display();
 
 
 		dx = 0;
 		rotate = 0;
-		delay = 0.3;
+		delay = 0.2;
 
 		window.clear(Color::White);
 		window.draw(z);
 		window.draw(c);
+
+			// //
+			// // отрисовка следующей тетрамины
+			// //
+			// for (int i = 0; i < M; i++)
+			// for (int j = 0; j < N; j++)
+			// {
+			// 	if (tempfield[i][j] == 0) continue;
+			// 	tn.setTextureRect(IntRect(tempfield[i][j]*0, 0, 18, 18));//изменение цвета спрайта
+			// 	tn.setPosition(j, i);//модулирование позиции на нужное место
+			// 	// viewtetraminno(n);
+			// 	tn.setPosition(4 , 4 );//задаем позицию текста, центр камеры
+			// 	window.draw(tn);//рисую этот текст 
+			// 	// window.draw(tn);
+			// }
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		//
 		// Отрисовка тетрамин лежащих на дне колодца
 		//
@@ -294,7 +422,7 @@ int main()
 // s.setPosition(10,10);
 // window.draw(s);
 		// Вывод на экран
-		window.display();
+		// window.display();
 	}
 int n;
 	std::cout << "GAME OVER!";
