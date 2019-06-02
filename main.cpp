@@ -8,7 +8,7 @@ using namespace sf;
 using namespace std;
 
 const int M = 37;
-const int N = 16;
+const int N = 14;
 
 const int random (int N) {return rand()%7;}
 
@@ -82,12 +82,13 @@ int main()
 
 	int dx = 5, colorNum = 1, dy = 0;
 	int playerscore = 0;
+	int tetrominofull = 0;
 	bool rotate = 0;
 	float timer = 0, delay = 0.3;
 
 	Clock clock;
 
-	RenderWindow window(VideoMode(320, 700), "The TETRIS");
+	RenderWindow window(VideoMode(305, 700), "The TETRIS");
 
 
 	while (window.isOpen() && check())
@@ -174,6 +175,7 @@ int main()
 					if (field[i][j]) count++;
 					field[k][j] = field[i][j];
 				}
+				tetrominofull += count;
 				if (count < N) k--;
 				if (count == N) playerscore += 100;
 			}
@@ -185,12 +187,11 @@ int main()
 			//
 			//
 
-		ostringstream playerScoreString;    // объявили переменную
-		playerScoreString << playerscore;		//занесли в нее число очков, то есть формируем строку
+		ostringstream playerScoreString;// объявили переменную
+		playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
 		text.setString("Score:" + playerScoreString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-		text.setPosition(143, 30);//задаем позицию текста, отступая от центра камеры
-		window.draw(text);//рисую этот текст
-
+		text.setPosition(143, 30);
+		window.draw(text);
 
 
 
@@ -238,7 +239,7 @@ int main()
 
 
 			
-				colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
+				// colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
 
 
 
@@ -246,18 +247,24 @@ int main()
 				int n = rand()%7;
 				int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 				if (tempb[0].x == 0 && tempb[0].y == 0)
-				for (int i = 0; i < 4; i++)
 				{
-					// shetrand = n;
-					a[i].x = figures[n][i] % 2;
-					a[i].y = figures[n][i] / 2;
-					tempa[i].x = a[i].x;
-					tempa[i].y = a[i].y;
-					tempb[i].x = tempfigures[shetrand][i] % 2;
-					tempb[i].y = tempfigures[shetrand][i] / 2;
+					for (int i = 0; i < 4; i++)
+					{
+						// shetrand = n;
+						a[i].x = figures[n][i] % 2;
+						a[i].y = figures[n][i] / 2;
+						tempa[i].x = a[i].x;
+						tempa[i].y = a[i].y;
+					}
+					n = shetrand;
+					for (int i = 0; i < 4; i++)
+					{
+						a[i].x = figures[shetrand][i] % 2;
+						a[i].y = figures[shetrand][i] / 2;
+						tempb[i].x = a[i].x;
+						tempb[i].y = a[i].x;
+					}
 				}
-
-
 
 		// int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 		// shetrand = n;
@@ -291,9 +298,9 @@ for (int i = 0, j = 0; i < 4; i++)
 			// {
 				// if (field[i][j] == 0) continue;
 				// s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));//изменение цвета спрайта
-				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
+				// s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
 
-				// s.setPosition(tempa[i].x * 10, tempa[i].y * 10);//обнуление позиции на нужное место
+				s.setPosition(tempa[i].x * 10, tempa[i].y * 10);//обнуление позиции на нужное место
 				s.move(28,31);//выравнивание спрайтов 
 				// s.setPosition(j, i);//модулирование позиции на нужное место
 				// viewtetraminno(n);
@@ -313,7 +320,31 @@ for (int i = 0, j = 0; i < 4; i++)
 		window.display();
 		dx = 0;
 		rotate = 0;
-		delay = 0.2;
+		delay = 0.5;
+		if (playerscore >= 1000)// level 2
+		{
+			delay = 0.3;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.06;
+		}
+
+		if (playerscore >= 5000) // level 3
+		{
+			colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
+			delay = 0.1;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
+		}
+
+		if (playerscore >= 10000 && playerscore <= 12000) // level 4
+		{
+			delay = 0.05;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.005;
+		}
+		if (playerscore >= 12000 && playerscore <= 15000) //bonus level 5
+		{
+			delay = 0.1;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
+		}
+
 
 		window.clear(Color::White);
 		window.draw(z);
