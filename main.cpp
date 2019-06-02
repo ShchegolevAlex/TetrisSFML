@@ -68,7 +68,6 @@ int main()
 	Font font;
 	font.loadFromFile("CyrilicOld.TTF");
 	Text text("", font, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	// text.setColor();//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
 	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 
 	Sprite c(frame);
@@ -80,9 +79,8 @@ int main()
 	Sprite tn(tilesnext);
 	// s.setTextureRect(IntRect(0,0,18,18));
 
-	int dx = 5, colorNum = 1, dy = 0;
+	int dx = 0, colorNum = 1, dy = 0;
 	int playerscore = 0;
-	int tetrominofull = 0;
 	bool rotate = 0;
 	float timer = 0, delay = 0.3;
 
@@ -92,6 +90,7 @@ int main()
 
 
 	while (window.isOpen() && check())
+
 	{
 		float time = clock.getElapsedTime().asSeconds();
 		clock.restart();
@@ -110,6 +109,8 @@ int main()
 		}
 
 		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;	
+				// s.setOrigin(-50, 50);
+
 
 		// Move
 
@@ -175,7 +176,6 @@ int main()
 					if (field[i][j]) count++;
 					field[k][j] = field[i][j];
 				}
-				tetrominofull += count;
 				if (count < N) k--;
 				if (count == N) playerscore += 100;
 			}
@@ -291,31 +291,31 @@ int main()
 			//
 			// отрисовка следующей тетрамины
 			//
-for (int i = 0, j = 0; i < 4; i++)
-{
-			// for (int i = 0; i < M; i++)
-			// for (int j = 0; j < N; j++)
-			// {
-				// if (field[i][j] == 0) continue;
-				// s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));//изменение цвета спрайта
-				// s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
+// for (int i = 0, j = 0; i < 4; i++)
+// {
+// 			// for (int i = 0; i < M; i++)
+// 			// for (int j = 0; j < N; j++)
+// 			// {
+// 				// if (field[i][j] == 0) continue;
+// 				// s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));//изменение цвета спрайта
+// 				// s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
 
-				s.setPosition(tempa[i].x * 10, tempa[i].y * 10);//обнуление позиции на нужное место
-				s.move(28,31);//выравнивание спрайтов 
-				// s.setPosition(j, i);//модулирование позиции на нужное место
-				// viewtetraminno(n);
-				// s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
-				// window.draw(s);//рисую этот текст 
-				// window.draw(tn);
-			// }
-
-
+// 				s.setPosition(tempa[i].x * 10, tempa[i].y * 10);//обнуление позиции на нужное место
+// 				s.move(28,31);//выравнивание спрайтов 
+// 				// s.setPosition(j, i);//модулирование позиции на нужное место
+// 				// viewtetraminno(n);
+// 				// s.setPosition(4 , 4 );//задаем позицию текста, центр камеры
+// 				// window.draw(s);//рисую этот текст 
+// 				// window.draw(tn);
+// 			// }
 
 
-		// viewtetraminno(n);
-		s.setPosition(tempb[i].x * 18, tempb[i].y * 18);//обнуление позиции на нужное место // рисует фигуру но только один раз // показывает следующую тетравину только один раз
-		window.draw(s);
-}
+
+
+// 		// viewtetraminno(n);
+// 		s.setPosition(tempb[i].x * 18, tempb[i].y * 18);//обнуление позиции на нужное место // рисует фигуру но только один раз // показывает следующую тетравину только один раз
+// 		window.draw(s);
+// }
 
 		window.display();
 		dx = 0;
@@ -334,7 +334,7 @@ for (int i = 0, j = 0; i < 4; i++)
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
 		}
 
-		if (playerscore >= 10000 && playerscore <= 12000) // level 4
+		if (playerscore >= 10000 && playerscore <= 11000) // level 4
 		{
 			delay = 0.05;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.005;
@@ -346,9 +346,9 @@ for (int i = 0, j = 0; i < 4; i++)
 		}
 
 
-		window.clear(Color::White);
-		window.draw(z);
-		window.draw(c);
+		// window.clear(Color::White);
+		// window.draw(z);
+		// window.draw(c);
 
 			// //
 			// // отрисовка следующей тетрамины
@@ -432,7 +432,9 @@ for (int i = 0, j = 0; i < 4; i++)
 
 
 
-
+		window.clear(Color::White);
+		window.draw(z);
+		window.draw(c);
 
 
 
@@ -448,9 +450,12 @@ for (int i = 0, j = 0; i < 4; i++)
 			for (int j = 0; j < N; j++)
 			{
 				if (field[i][j] == 0) continue;
+				// s.setOrigin(-50, 50);
 				s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));//изменение цвета спрайта
 				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
-				s.move(28,31);//выравнивание спрайтов 
+				window.draw(s);
+				// s.setPosition(105, 70);
+				s.move(100,100);//выравнивание спрайтов 
 				// s.setOrigin(-50, -50);
 				window.draw(s);
 			}
@@ -460,14 +465,22 @@ for (int i = 0, j = 0; i < 4; i++)
 			//
 		for (int i = 0; i < 4; i++)
 		{
+			// s.setOrigin(-50, 50);
 			s.setTextureRect(IntRect(colorNum*18,0,18,18)); //изменение цвета спрайта
 			s.setPosition(a[i].x * 18, a[i].y * 18);//обнуление позиции на нужное место
-			s.move(28,31);//выравнивание спрайтов 
+			// s.setOrigin(0,0);
 			window.draw(s);
+			// s.setPosition((a[1].x * 18) + 50, (a[1].y * 18) + 50);//обнуление позиции на нужное место
+			// s.setPosition(105, 70);
+			s.move(0,400);//выравнивание спрайтов 
+			// s.setPosition(105, 70);
+			window.draw(s);
+			// s.setPosition(50, 70);
+			// window.draw(s);
 		}
-
 		// Вывод на экран
 		// window.display();
+
 	}
 int n;
 	cout << "GAME OVER!" << endl;
