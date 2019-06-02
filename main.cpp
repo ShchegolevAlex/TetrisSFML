@@ -175,10 +175,8 @@ int main()
 					field[k][j] = field[i][j];
 				}
 				if (count < N) k--;
-
+				if (count == N) playerscore += 100;
 			}
-
-
 
 //
 			//
@@ -441,7 +439,8 @@ for (int i = 0, j = 0; i < 4; i++)
 		// window.display();
 	}
 int n;
-	std::cout << "GAME OVER!";
+	cout << "GAME OVER!" << endl;
+	cout << "You score: " << playerscore << endl;
 	// system("PAUSE");
 	std::cin >> n;
 
