@@ -48,7 +48,13 @@ bool check()
 		else if(field[a[i].y][a[i].x])return 0;
 	return 1;
 }
-
+bool tempcheck()
+{
+	for (int i = 0; i < 4; i++)
+		if (tempa[i].x < 0 || tempa[i].x >= N || tempa[i].y >= M) return 0;
+		else if(field[tempa[i].y][tempa[i].x])return 0;
+	return 1;
+}
 
 
 
@@ -246,25 +252,80 @@ int main()
 
 				int n = rand()%7;
 				int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
-				if (tempb[0].x == 0 && tempb[0].y == 0)
+				
+				if (a[0].x == 0 && a[0].y == 0)
 				{
 					for (int i = 0; i < 4; i++)
 					{
 						// shetrand = n;
 						a[i].x = figures[n][i] % 2;
 						a[i].y = figures[n][i] / 2;
+
+					}
+				}		
+				if (tempa[0].x == 0 && tempa[0].y == 0)
+				{
+					for (int i = 0; i < 4; i++)
+					{
+						// shetrand = n;
+						// a[i].x = figures[n][i] % 2;
+						// a[i].y = figures[n][i] / 2;
 						tempa[i].x = a[i].x;
 						tempa[i].y = a[i].y;
 					}
-					n = shetrand;
-					for (int i = 0; i < 4; i++)
-					{
-						a[i].x = figures[shetrand][i] % 2;
-						a[i].y = figures[shetrand][i] / 2;
-						tempb[i].x = a[i].x;
-						tempb[i].y = a[i].x;
-					}
+				}	
+				
+
+
+	for (int i = 0; i < 4; i++)
+		{
+			tempb[i] = tempa[i];
+			tempa[i].x += dx;
+		}
+		if (!tempcheck())for (int i = 0; i < 4; i++) {tempa[i] = tempb[i];}
+
+		// Rotate
+
+		if (rotate == true)
+		{
+			Point p = tempa[1]; // центр вращения фигуры
+			for (int i = 0; i < 4; i++)// реализация поворота
+			{
+				int x = tempa[i].y - p.y;
+				int y = tempa[i].x - p.x;
+				tempa[i].x = p.x - x;
+				tempa[i].y = p.y + y;
+			}
+			if (!tempcheck()) for (int i = 0; i < 4; i++) tempa[i] = tempb[i];
+		}
+
+		// Tick
+
+		if (timer > delay)
+		{
+			for (int i = 0; i < 4; i++) 
+				{
+					tempb[i] = tempa[i];
+					tempa[i].y += 1;
 				}
+			if (!tempcheck())
+			{
+				for (int i = 0; i < 4; i++)	tempfield[tempb[i].y][tempb[i].x] = colorNum;
+				
+				colorNum = 1 + rand()%7;
+				for (int i = 0; i < 4; i++)
+				{
+					tempa[i].x = figures[n][i] % 2;
+					tempa[i].y = figures[n][i] / 2;
+					// window.draw(s);
+
+				}
+
+			}
+			timer = 0;
+		}
+
+
 
 		// int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 		// shetrand = n;
@@ -456,6 +517,13 @@ int main()
 				window.draw(s);
 				// s.setPosition(105, 70);
 				s.move(100,100);//выравнивание спрайтов 
+				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
+
+				s.setTextureRect(IntRect(tempfield[i][j]*0, 0, 18, 18));//изменение цвета спрайта
+
+				s.setTextureRect(IntRect(colorNum*18,0,18,18)); //изменение цвета спрайта
+
+				s.setPosition(tempa[i].x * 18, tempa[i].y * 18);//обнуление позиции на нужное место
 				// s.setOrigin(-50, -50);
 				window.draw(s);
 			}
@@ -474,6 +542,9 @@ int main()
 			// s.setPosition(105, 70);
 			s.move(0,400);//выравнивание спрайтов 
 			// s.setPosition(105, 70);
+			s.setTextureRect(IntRect(colorNum*18,0,18,18)); //изменение цвета спрайта
+
+			s.setPosition(tempa[i].x * 18, tempa[i].y * 18);//обнуление позиции на нужное место
 			window.draw(s);
 			// s.setPosition(50, 70);
 			// window.draw(s);
