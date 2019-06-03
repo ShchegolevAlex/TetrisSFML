@@ -67,7 +67,6 @@ void Play(RenderWindow & window)
 	frame.loadFromFile("images/frame9ps.png");
 	background.loadFromFile("images/backgraund.jpg");
 	tiles.loadFromFile("images/tiles.png");
-	tilesnext.loadFromFile("images/tiles.png");
 
 	Font font;
 	font.loadFromFile("CyrilicOld.TTF");
@@ -331,6 +330,8 @@ void menu(RenderWindow & window) {
 	Text textlicense("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 	// textplay.setColor(Color::Red);//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
 	textplay.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+	textsettings.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+	textlicense.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 
 
 
