@@ -111,6 +111,7 @@ void Play(RenderWindow & window)
 	// menu(window);//вызов меню
 	int dx = 5, colorNum = 1, dy = 0;
 	// int playerscore = 0;
+	int shetlevel = 1;
 	int tetrominofull = 0;
 	bool rotate = 0;
 	float timer = 0, delay = 0.3;
@@ -214,10 +215,14 @@ void Play(RenderWindow & window)
 
 		ostringstream playerScoreString;// объявили переменную
 		playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
+		ostringstream playerLevelString;// объявили переменную
+		playerLevelString << shetlevel;//занесли в нее число очков, то есть формируем строку
 		text.setString("Score:" + playerScoreString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-		text.setPosition(115, 30);
+		text.setPosition(115, 18);
 		window.draw(text);
-
+		level.setString("Level " + playerLevelString.str());//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+		level.setPosition(118, 42);
+		window.draw(level);
 
 
 
@@ -244,7 +249,7 @@ void Play(RenderWindow & window)
 					{
 						a[i].x = figures[shetrand][i] % 2;
 						a[i].y = figures[shetrand][i] / 2;
-						tempb[i].x = a[i].x;
+					tempb[i].x = a[i].x;
 						tempb[i].y = a[i].x;
 					}
 				}
@@ -255,72 +260,86 @@ void Play(RenderWindow & window)
 		delay = 0.5;
 		if (playerscore >= 1000)// level 2
 		{
-			level.setString("Level 1");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-			level.setPosition(160, 450);
-			window.draw(level);
 			delay = 0.4;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.04;
+			shetlevel = 2;
 		}
 
 		if (playerscore >= 2000) // level 3
 		{
-			colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
 			delay = 0.3;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.03;
+			shetlevel = 3;
 		}
 
 		if (playerscore >= 3000) // level 4
 		{
+			shetlevel = 4;
 			delay = 0.2;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.02;
 		}
 		if (playerscore >= 4000) //bonus level 5
 		{
+			shetlevel = 5;
 			delay = 0.1;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
 		}
 		if (playerscore >= 5000) //bonus level 6
 		{
+			shetlevel = 6;
+			colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
 			delay = 0.09;
+			level.setFillColor(Color(255,255,128,128));
+			level.setOutlineColor(Color::Red);
+			level.setString("GOLD LEVEL");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+			window.draw(level);
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.009;
 		}
 		if (playerscore >= 6000) //bonus level 7
 		{
+			shetlevel = 7;
 			delay = 0.08;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.008;
 		}
 		if (playerscore >= 7000) //bonus level 8
 		{
+			shetlevel = 8;
 			delay = 0.07;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.007;
 		}
 		if (playerscore >= 8000) //bonus level 9
 		{
+			shetlevel = 9;
 			delay = 0.06;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.006;
 		}		
 		if (playerscore >= 9000) //bonus level 10
 		{
+			shetlevel = 10;
 			delay = 0.05;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.007;
 		}
 		if (playerscore >= 10000) //bonus level 11
 		{
+			shetlevel = 11;
 			delay = 0.04;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.006;
 		}
 		if (playerscore >= 11000) //bonus level 12
 		{
+			shetlevel = 12;
 			delay = 0.03;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.005;
 		}
 		if (playerscore >= 12000) //bonus level 13
 		{
+			shetlevel = 13;
 			delay = 0.02;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.004;
 		}
 		if (playerscore >= 13000) //bonus level 14
 		{
+			shetlevel = 14;
 			delay = 0.01;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.003;
 		}				
@@ -408,6 +427,7 @@ void Play(RenderWindow & window)
 			fontgameover.loadFromFile("CyrilicOld.TTF");
 			Text gameover("", fontgameover, 20);
 			Text score("", fontgameover, 20);
+			Text record("", )
 			score.setStyle(sf::Text::Bold | sf::Text::Underlined);
 			ostringstream playerScoreString;// объявили переменную
 			playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
