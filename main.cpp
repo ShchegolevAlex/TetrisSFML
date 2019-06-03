@@ -52,9 +52,13 @@ bool check()
 
 
 
-int main()
+
+
+
+
+void Play(RenderWindow & window)
 {
-	srand(time(NULL));
+
 	Texture tiles;
 	Texture background;
 	Texture frame;
@@ -79,18 +83,14 @@ int main()
 
 	Sprite tn(tilesnext);
 	// s.setTextureRect(IntRect(0,0,18,18));
-
+	// menu(window);//вызов меню
 	int dx = 5, colorNum = 1, dy = 0;
 	int playerscore = 0;
 	int tetrominofull = 0;
 	bool rotate = 0;
 	float timer = 0, delay = 0.3;
-
 	Clock clock;
-
-	RenderWindow window(VideoMode(320, 575), "The TETRIS");
-
-
+		
 	while (window.isOpen() && check())
 	{
 		float time = clock.getElapsedTime().asSeconds();
@@ -302,11 +302,131 @@ int main()
 			window.draw(s);
 		}
 	}
-int n;
+
+
+}
+
+
+
+void menu(RenderWindow & window) {
+
+	Texture play;
+	Texture settings; 
+	Texture license; 
+	Texture shotdown; 
+	Texture menuBackground;
+	Texture viewlevel;
+
+	play.loadFromFile("images/buttonmenu.png");
+	settings.loadFromFile("images/buttonmenu.png");
+	license.loadFromFile("images/buttonmenu.png");
+	shotdown.loadFromFile("images/buttonmenu.png");
+	menuBackground.loadFromFile("images/frame9ps.png");
+	viewlevel.loadFromFile("images/metatiles.png");
+
+	Font fontplay;
+	fontplay.loadFromFile("CyrilicOld.TTF");
+	Text textplay("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	Text textsettings("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	Text textlicense("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	// textplay.setColor(Color::Red);//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
+	textplay.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+
+
+
+	Sprite p(play); 
+	Sprite sett(settings); 
+	Sprite lic(license); 
+	Sprite shot(shotdown); 
+	Sprite menuBg(menuBackground);
+	Sprite lev(viewlevel);
+	
+	bool isMenu = 1;
+	int menuNum = 0;
+
+		// ostringstream play;// объявили переменную
+		// playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
+		textplay.setString("Play");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+		textsettings.setString("Settings");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+		textlicense.setString("License");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+		textplay.setPosition(140, 187);
+		textsettings.setPosition(120, 257);
+		textlicense.setPosition(130, 327);
+		window.draw(textplay);
+
+
+	p.setPosition(5, 30);
+	sett.setPosition(5, 100);
+	lic.setPosition(5, 170);
+	menuBg.setPosition(0, 0);
+	lev.setPosition(5, 50);
+ 
+	//////////////////MENU///////////////////
+	while (isMenu)
+	{
+		p.setColor(Color::White);
+		sett.setColor(Color::White);
+		lic.setColor(Color::White);
+		menuNum = 0;
+		window.clear();
+ 
+		if (IntRect(0, 200, 500, 20).contains(Mouse::getPosition(window))) {p.setColor(Color::Black); menuNum = 1; }
+		if (IntRect(0, 270, 500, 20).contains(Mouse::getPosition(window))) {sett.setColor(Color::Black); menuNum = 2; }
+		if (IntRect(0, 340, 500, 20).contains(Mouse::getPosition(window))) {lic.setColor(Color::Black); menuNum = 3; }
+ 
+		if (Mouse::isButtonPressed(Mouse::Left))
+		{
+			if (menuNum == 1) { 
+				// window.clear();
+				window.draw(lev); 
+				window.display(); 
+				Play(window); 
+				isMenu = false; 
+				// while (!Keyboard::isKeyPressed(Keyboard::Escape));
+			}
+			if (menuNum == 2) { 
+				window.close(); 
+				isMenu = false; 
+			}
+			if (menuNum == 3)  { 
+				window.close(); 
+				isMenu = false; 
+			}
+			if (menuNum == 4)  { 
+				window.close(); 
+				isMenu = false; 
+			}
+ 
+		}
+ 
+		window.draw(menuBg);
+		window.draw(p);
+		window.draw(sett);
+		window.draw(lic);
+		window.draw(textplay);
+		window.draw(textsettings);
+		window.draw(textlicense);
+		
+		window.display();
+	}
+}
+
+
+
+
+
+
+int main()
+{
+	srand(time(NULL));
+
+	RenderWindow window(VideoMode(320, 575), "The TETRIS");
+	menu(window);
+	// Play(window);
+	int n;
 	cout << "GAME OVER!" << endl;
-	cout << "You score: " << playerscore << endl;
+	// cout << "You score: " << playerscore << endl;
 	// system("PAUSE");
 	std::cin >> n;
-
 	return 0;
 }
