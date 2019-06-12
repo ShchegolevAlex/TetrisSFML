@@ -12,15 +12,20 @@ using namespace std;
 const int M = 30;
 const int N = 14;
 int playerscore = 0;
+int colorNum;
+float timer;
+float delay;
+int dx;
 
 
 const int random (int N) {return rand()%7;}
 
-int field[M][N] = {0};
-int tempfield[M][N] = {0};
+int gamespace[M][N] = {0};
 
 struct Point
-{int x, y;} a[4], b[4], tempa[4], tempb[4];
+	{
+		int x, y;
+	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4]; // реализуй х на движение с центра
 
 int figures[7][4] = 
 {
@@ -34,49 +39,104 @@ int figures[7][4] =
 };
 
 
-int tempfigures[7][4] = 
-{
-	1,3,5,7,
-	2,4,5,7,
-	3,5,4,6,
-	3,5,4,7,
-	2,3,5,7,
-	3,5,7,6,
-	2,3,4,5,
-};
-
 
 bool check()
 {
 	for (int i = 0; i < 4; i++)
-		if (a[i].x < 0 || a[i].x >= N || a[i].y >= M) return 0;
-		else if(field[a[i].y][a[i].x])return 0;
+		if (tetrominofirst[i].x < 0 || tetrominofirst[i].x >= N || tetrominofirst[i].y >= M) return 0;
+		else if(gamespace[tetrominofirst[i].y][tetrominofirst[i].x])return 0;
 	return 1;
 }
 
 
 
-void Record(int playerscore)
+void Record(RenderWindow & window ,int playerscore)
 {
-		char buff[1];
-		int a = 0;
+		char buf[1];
+		string buff;
+		buff.resize(30);
+		int Record = 0;
 		fstream recordlist;
-		recordlist.open("Recordlist.txt", ios::app);
-		recordlist >> buff[0];
-		a = buff[0];
+		ostringstream playerScoreRecord;
+		Font fontrecord;
+		fontrecord.loadFromFile("CyrilicOld.TTF");
+		Text record("", fontrecord, 20);
+		record.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+		recordlist.open("Recordlist.txt", ios::in);
+		recordlist >> buf[0];
+		recordlist >> buff;
 		recordlist.close();
 		recordlist.open("Recordlist.txt");
-		if (buff[0] < playerscore)
+		if (buf[0] < playerscore)
 		{
 			recordlist.close();
 			recordlist.open("Recordlist.txt", ios::out);
 			recordlist << playerscore;
+			playerScoreRecord << playerscore;
 			recordlist.close();
 		}
-		else {recordlist.close();}
+		else {playerScoreRecord << buff; recordlist.close();}
+		
+		record.setString("Record:" + playerScoreRecord.str());
+		record.setPosition(120,320);
+		window.draw(record);
+}
+
+void Draw(RenderWindow & window, Sprite s)
+{
+
+		//
+		// Отрисовка тетрамин лежащих на дне колодца
+		//
+			for (int i = 0; i < M; i++)
+			for (int j = 0; j < N; j++)
+			{
+				if (gamespace[i][j] == 0) continue;
+				s.setTextureRect(IntRect(gamespace[i][j]*0, 0, 18, 18));
+				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
+				s.move(28,31);//выравнивание спрайтов 
+				window.draw(s);
+			}
+
+			//
+			//	Отрисовка падающих тетрамин
+			//
+		for (int i = 0; i < 4; i++)
+		{	
+			s.setTextureRect(IntRect(colorNum * 18, 0, 18, 18));
+			s.setPosition(tetrominofirst[i].x * 18, tetrominofirst[i].y * 18);//обнуление позиции на нужное место
+			s.move(28,31);//выравнивание спрайтов 
+			window.draw(s);
+		}
 }
 
 
+void Tick(RenderWindow & window, Sprite s)
+{
+
+		if (timer > delay)
+		{
+			for (int i = 0; i < 4; i++) 
+				{
+					tetrominosecond[i] = tetrominofirst[i];
+					tetrominofirst[i].y += 1;
+				}
+			if (!check())
+			{
+				for (int i = 0; i < 4; i++)	gamespace[tetrominosecond[i].y][tetrominosecond[i].x] = colorNum;
+				
+				colorNum = 1 + rand()%7;
+				int n = rand()%7;
+				for (int i = 0; i < 4; i++)
+				{
+					tetrominofirst[i].x = figures[n][i] % 2;
+					tetrominofirst[i].y = figures[n][i] / 2;
+				}
+
+			}
+			timer = 0;
+		}
+}
 
 
 void Play(RenderWindow & window)
@@ -107,14 +167,15 @@ void Play(RenderWindow & window)
 	Sprite s(tiles);
 
 	Sprite tn(tilesnext);
-	// s.setTextureRect(IntRect(0,0,18,18));
-	// menu(window);//вызов меню
-	int dx = 5, colorNum = 1, dy = 0;
-	// int playerscore = 0;
+
+	colorNum = 1;
+	float fastplayerscore = 0;
 	int shetlevel = 1;
 	int tetrominofull = 0;
 	bool rotate = 0;
-	float timer = 0, delay = 0.3;
+	dx = 5;
+	timer = 0, 
+	delay = 0.3;
 	Clock clock;
 		
 	while (window.isOpen() && check())
@@ -122,7 +183,7 @@ void Play(RenderWindow & window)
 		float time = clock.getElapsedTime().asSeconds();
 		clock.restart();
 		timer += time;
-
+		window.setVerticalSyncEnabled(true);
 		Event e;
 		while (window.pollEvent(e))
 		{
@@ -138,75 +199,50 @@ void Play(RenderWindow & window)
 		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;	
 
 		// Move
-
 		for (int i = 0; i < 4; i++)
 		{
-			b[i] = a[i];
-			a[i].x += dx;
+			tetrominosecond[i] = tetrominofirst[i];
+			tetrominofirst[i].x += dx;
 		}
-		if (!check())for (int i = 0; i < 4; i++) {a[i] = b[i];}
+		if (!check())for (int i = 0; i < 4; i++) {tetrominofirst[i] = tetrominosecond[i];}//запрет выходв за левую и правую границы
 
 		// Rotate
 
 		if (rotate == true)
 		{
-			Point p = a[1]; // центр вращения фигуры
+			Point p = tetrominofirst[1]; // центр вращения фигуры
 			for (int i = 0; i < 4; i++)// реализация поворота
 			{
-				int x = a[i].y - p.y;
-				int y = a[i].x - p.x;
-				a[i].x = p.x - x;
-				a[i].y = p.y + y;
+				int x = tetrominofirst[i].y - p.y;
+				int y = tetrominofirst[i].x - p.x;
+				tetrominofirst[i].x = p.x - x;
+				tetrominofirst[i].y = p.y + y;
 			}
-			if (!check()) for (int i = 0; i < 4; i++) a[i] = b[i];
+			if (!check()) for (int i = 0; i < 4; i++) tetrominofirst[i] = tetrominosecond[i];//запрет на выход за границу колодца при вращении
 		}
 
 		// Tick
-
-		if (timer > delay)
-		{
-			for (int i = 0; i < 4; i++) 
-				{
-					b[i] = a[i];
-					a[i].y += 1;
-				}
-			if (!check())
-			{
-				for (int i = 0; i < 4; i++)	field[b[i].y][b[i].x] = colorNum;
-				
-				colorNum = 1 + rand()%7;
-				int n = rand()%7;
-				// if (a[0].x == 0)
-				for (int i = 0; i < 4; i++)
-				{
-					a[i].x = figures[n][i] % 2;
-					a[i].y = figures[n][i] / 2;
-					// window.draw(s);
-
-				}
-
-			}
-			timer = 0;
-		}
-
+		Tick(window, s);
 		//
 		//проверка линий на заполнение
 		//
+			int flag = 0;
 			int k = M - 1;
 			for (int i = M - 1; i > 0; i--)
 			{
 				int count = 0;
 				for (int j = 0; j < N; j++)
 				{
-					if (field[i][j]) count++;
-					field[k][j] = field[i][j];
+					if (gamespace[i][j]) count++;
+					gamespace[k][j] = gamespace[i][j];
 				}
-				tetrominofull += count;
 				if (count < N) k--;
+				// for (int g = 0; g < 4; g++) {}
 				if (count == N) playerscore += 100;
+				if (count == M - 26 && count == N) playerscore += 1500; // очки за тетрис доработать!!!!
 			}
 
-//
+			//
 			//
 			//
 			// Вывод счета игрока через стандартную библиотеку С++
@@ -239,18 +275,18 @@ void Play(RenderWindow & window)
 					for (int i = 0; i < 4; i++)
 					{
 						// shetrand = n;
-						a[i].x = figures[n][i] % 2;
-						a[i].y = figures[n][i] / 2;
-						tempa[i].x = a[i].x;
-						tempa[i].y = a[i].y;
+						tetrominofirst[i].x = figures[n][i] % 2;
+						tetrominofirst[i].y = figures[n][i] / 2;
+						tempa[i].x = tetrominofirst[i].x;
+						tempa[i].y = tetrominofirst[i].y;
 					}
 					n = shetrand;
 					for (int i = 0; i < 4; i++)
 					{
-						a[i].x = figures[shetrand][i] % 2;
-						a[i].y = figures[shetrand][i] / 2;
-					tempb[i].x = a[i].x;
-						tempb[i].y = a[i].x;
+						tetrominofirst[i].x = figures[shetrand][i] % 2;
+						tetrominofirst[i].y = figures[shetrand][i] / 2;
+						tempb[i].x = tetrominofirst[i].x;
+						tempb[i].y = tetrominofirst[i].x;
 					}
 				}
 
@@ -261,7 +297,7 @@ void Play(RenderWindow & window)
 		if (playerscore >= 1000)// level 2
 		{
 			delay = 0.4;
-			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.04;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) {delay = 0.04;}
 			shetlevel = 2;
 		}
 
@@ -287,11 +323,11 @@ void Play(RenderWindow & window)
 		if (playerscore >= 5000) //bonus level 6
 		{
 			shetlevel = 6;
-			colorNum = 1 + rand()%7; //определение переменной сolorNumв теле цикла вызывает мерцание тетрамин
+			colorNum = 1 + rand()%7; //определение переменной сolorNumв в теле цикла вызывает мерцание тетрамин
 			delay = 0.09;
 			level.setFillColor(Color(255,255,128,128));
 			level.setOutlineColor(Color::Red);
-			level.setString("GOLD LEVEL");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+			level.setString("GOLD LEVEL");
 			window.draw(level);
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.009;
 		}
@@ -358,68 +394,8 @@ void Play(RenderWindow & window)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// 	for (int j = 0; j < 4; ++j)
-// 		{
-// 		int n = rand()% 7;
-// 			int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
-// 				if (tempb[0].x == 0 && tempb[0].y == 0)
-// 				{
-// 					for (int i = 0; i < 4; i++)
-// 					{
-// 						// shetrand = n;
-// 						a[i].x = figures[n][i] % 2;
-// 						a[i].y = figures[n][i] / 2;
-// 						tempa[i].x = a[i].x;
-// 						tempa[i].y = a[i].y;
-// 					}
-// 					n = shetrand;
-// 					for (int i = 0; i < 4; i++)
-// 					{
-// 						a[i].x = figures[n][i] % 2;
-// 						a[i].y = figures[n][i] / 2;
-// 						tempb[i].x = a[i].x;
-// 						tempb[i].y = a[i].x;
-// 					}
-// 				}
-// 		for (int i = 0; i < 4; i++)
-// 		{
-// 			s.setTextureRect(IntRect(colorNum*18,0,18,18));
-// 			s.setPosition(tempa[i].x * 18, tempa[i].y * 18);//обнуление позиции на нужное место
-// 			window.draw(s);
-// 			s.move(28,31);//выравнивание спрайтов 
-// 			window.draw(s);
-// 		}
-// }
 
-
-
-
-		//
-		// Отрисовка тетрамин лежащих на дне колодца
-		//
-						// s.setPosition(10,10);
-
-			for (int i = 0; i < M; i++)
-			for (int j = 0; j < N; j++)
-			{
-				if (field[i][j] == 0) continue;
-				s.setTextureRect(IntRect(field[i][j]*0, 0, 18, 18));
-				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
-				s.move(28,31);//выравнивание спрайтов 
-				window.draw(s);
-			}
-
-			//
-			//	Отрисовка падающих тетрамин
-			//
-		for (int i = 0; i < 4; i++)
-		{
-
-			s.setTextureRect(IntRect(colorNum*18,0,18,18));
-			s.setPosition(a[i].x * 18, a[i].y * 18);//обнуление позиции на нужное место
-			s.move(28,31);//выравнивание спрайтов 
-			window.draw(s);
-		}
+		Draw(window, s);
 
 		if (window.isOpen() && !check()) //вывод окончания игры и вывод очков игрока
 		{
@@ -427,7 +403,7 @@ void Play(RenderWindow & window)
 			fontgameover.loadFromFile("CyrilicOld.TTF");
 			Text gameover("", fontgameover, 20);
 			Text score("", fontgameover, 20);
-			Text record("", )
+			Text record("", fontgameover, 20);
 			score.setStyle(sf::Text::Bold | sf::Text::Underlined);
 			ostringstream playerScoreString;// объявили переменную
 			playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
@@ -438,8 +414,9 @@ void Play(RenderWindow & window)
 			score.setPosition(120,285);
 			window.draw(score);
 			window.draw(gameover);
+			Record(window, playerscore);
 			window.display();
-			Record(playerscore);
+
 		}
 
 
@@ -447,10 +424,13 @@ void Play(RenderWindow & window)
 	int n;
 	cout << "GAME OVER!" << endl;
 	cout << "You score: " << playerscore << endl;
-	// system("PAUSE");
 	std::cin >> n;
 
 }
+
+
+
+
 
 
 void menu(RenderWindow & window) {
@@ -463,7 +443,6 @@ void menu(RenderWindow & window) {
 	Texture viewlevel;
 
 	play.loadFromFile("images/buttonmenu.png");
-	// settings.loadFromFile("images/buttonmenu.png");
 	license.loadFromFile("images/buttonmenu.png");
 	shotdown.loadFromFile("images/buttonmenu.png");
 	menuBackground.loadFromFile("images/frame9ps.png");
@@ -472,19 +451,15 @@ void menu(RenderWindow & window) {
 	Font fontplay;
 	fontplay.loadFromFile("CyrilicOld.TTF");
 	Text textplay("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	// Text textsettings("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 	Text textlicense("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 	Text textshotdown("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	// textplay.setColor(Color::Red);//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
 	textplay.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
-	// textsettings.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 	textlicense.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 	textshotdown.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 
 
 
 	Sprite p(play); 
-	// Sprite sett(settings); 
 	Sprite lic(license); 
 	Sprite shot(shotdown); 
 	Sprite menuBg(menuBackground);
@@ -493,8 +468,6 @@ void menu(RenderWindow & window) {
 	bool isMenu = 1;
 	int menuNum = 0;
 
-		// ostringstream play;// объявили переменную
-		// playerScoreString << playerscore;//занесли в нее число очков, то есть формируем строку
 		textplay.setString("Play");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
 		textshotdown.setString("Exit");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
 		textlicense.setString("License");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
@@ -526,12 +499,10 @@ void menu(RenderWindow & window) {
 		if (Mouse::isButtonPressed(Mouse::Left))
 		{
 			if (menuNum == 1) { 
-				// window.clear();
 				window.draw(lev); 
 				window.display(); 
 				Play(window); 
 				isMenu = false; 
-				// while (!Keyboard::isKeyPressed(Keyboard::Escape));
 			}
 			if (menuNum == 2) { 
 				window.close(); 
@@ -569,30 +540,6 @@ void License(RenderWindow & window)
 	backgroundsettings.loadFromFile("images/backgroundsettings.png");
 
 }
-
-// void Record()
-// {
-// 	char buff[50];
-// 	fstream recordlist;
-// 	recordlist.open("Recordlist.txt", ios::out);
-// 	for (int i = 0; i < 50; i++)
-// 	if (buff[i] == ' ' )
-// 	{
-// 		cin.getline(buff, 50);
-// 		recordlist << playerscore;
-// 		recordlist.close();
-// 	}
-// 	else
-// 	{
-// 		cin.getline(buff, 50);
-// 		recordlist << ' ';
-// 		recordlist << playerscore;
-// 		recordlist.close();
-// 	}
-// }
-
-
-
 
 int main()
 {
