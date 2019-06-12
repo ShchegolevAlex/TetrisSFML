@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
 using namespace sf;
 using namespace std;
 
@@ -17,7 +18,6 @@ float timer;
 float delay;
 int dx;
 
-
 const int random (int N) {return rand()%7;}
 
 int gamespace[M][N] = {0};
@@ -25,7 +25,7 @@ int gamespace[M][N] = {0};
 struct Point
 	{
 		int x, y;
-	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4]; // реализуй х на движение с центра
+	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
 
 int figures[7][4] = 
 {
@@ -38,17 +38,13 @@ int figures[7][4] =
 	2,3,4,5,
 };
 
-
-
-bool check()
+bool check()// границы
 {
 	for (int i = 0; i < 4; i++)
 		if (tetrominofirst[i].x < 0 || tetrominofirst[i].x >= N || tetrominofirst[i].y >= M) return 0;
 		else if(gamespace[tetrominofirst[i].y][tetrominofirst[i].x])return 0;
 	return 1;
 }
-
-
 
 void Record(RenderWindow & window ,int playerscore)
 {
@@ -61,7 +57,7 @@ void Record(RenderWindow & window ,int playerscore)
 		Font fontrecord;
 		fontrecord.loadFromFile("CyrilicOld.TTF");
 		Text record("", fontrecord, 20);
-		record.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+		record.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст
 		recordlist.open("Recordlist.txt", ios::in);
 		recordlist >> buf[0];
 		recordlist >> buff;
@@ -84,7 +80,6 @@ void Record(RenderWindow & window ,int playerscore)
 
 void Draw(RenderWindow & window, Sprite s)
 {
-
 		//
 		// Отрисовка тетрамин лежащих на дне колодца
 		//
@@ -97,14 +92,13 @@ void Draw(RenderWindow & window, Sprite s)
 				s.move(28,31);//выравнивание спрайтов 
 				window.draw(s);
 			}
-
 			//
 			//	Отрисовка падающих тетрамин
 			//
 		for (int i = 0; i < 4; i++)
 		{	
-			s.setTextureRect(IntRect(colorNum * 18, 0, 18, 18));
-			s.setPosition(tetrominofirst[i].x * 18, tetrominofirst[i].y * 18);//обнуление позиции на нужное место
+			s.setTextureRect(IntRect(colorNum * 18, 0, 18, 18));//задание цвета
+			s.setPosition(tetrominofirst[i].x * 18, tetrominofirst[i].y * 18);//нормализация движения
 			s.move(28,31);//выравнивание спрайтов 
 			window.draw(s);
 		}
@@ -113,7 +107,6 @@ void Draw(RenderWindow & window, Sprite s)
 
 void Tick(RenderWindow & window, Sprite s)
 {
-
 		if (timer > delay)
 		{
 			for (int i = 0; i < 4; i++) 
@@ -132,37 +125,47 @@ void Tick(RenderWindow & window, Sprite s)
 					tetrominofirst[i].x = figures[n][i] % 2;
 					tetrominofirst[i].y = figures[n][i] / 2;
 				}
-
 			}
 			timer = 0;
 		}
 }
 
+void checklines(int scoreplus)//Проверка линий на заполнение
+{
+		int flag = 0;
+			int k = M - 1;
+			for (int i = M - 1; i > 0; i--)
+			{
+				int count = 0;
+				for (int j = 0; j < N; j++)
+				{
+					if (gamespace[i][j]) count++;
+					gamespace[k][j] = gamespace[i][j];
+				}
+				if (count < N) k--;
+				if (count == N) playerscore += scoreplus;
+			}
+}
+
 
 void Play(RenderWindow & window)
 {
-
 	Texture tiles;
-	Texture background;
 	Texture frame;
 	Texture tilesnext;
+	Font font;
 
 	frame.loadFromFile("images/frame9ps.png");
-	background.loadFromFile("images/backgraund.jpg");
 	tiles.loadFromFile("images/tilesnew.png");
-
-	Font font;
 	font.loadFromFile("CyrilicOld.TTF");
+
 	Text text("", font, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 	Text level("", font, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
 
-	// text.setColor();//покрасили текст в красный. если убрать эту строку, то по умолчанию он белый
 	text.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 	level.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
 
 	Sprite c(frame);
-
-	Sprite z(background);
 
 	Sprite s(tiles);
 
@@ -176,6 +179,8 @@ void Play(RenderWindow & window)
 	dx = 5;
 	timer = 0, 
 	delay = 0.3;
+	int scoreplus = 100;
+
 	Clock clock;
 		
 	while (window.isOpen() && check())
@@ -198,7 +203,8 @@ void Play(RenderWindow & window)
 
 		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;	
 
-		// Move
+		// Движение
+
 		for (int i = 0; i < 4; i++)
 		{
 			tetrominosecond[i] = tetrominofirst[i];
@@ -206,7 +212,7 @@ void Play(RenderWindow & window)
 		}
 		if (!check())for (int i = 0; i < 4; i++) {tetrominofirst[i] = tetrominosecond[i];}//запрет выходв за левую и правую границы
 
-		// Rotate
+		// Вращение
 
 		if (rotate == true)
 		{
@@ -221,29 +227,9 @@ void Play(RenderWindow & window)
 			if (!check()) for (int i = 0; i < 4; i++) tetrominofirst[i] = tetrominosecond[i];//запрет на выход за границу колодца при вращении
 		}
 
-		// Tick
 		Tick(window, s);
-		//
-		//проверка линий на заполнение
-		//
-			int flag = 0;
-			int k = M - 1;
-			for (int i = M - 1; i > 0; i--)
-			{
-				int count = 0;
-				for (int j = 0; j < N; j++)
-				{
-					if (gamespace[i][j]) count++;
-					gamespace[k][j] = gamespace[i][j];
-				}
-				if (count < N) k--;
-				// for (int g = 0; g < 4; g++) {}
-				if (count == N) playerscore += 100;
-				if (count == M - 26 && count == N) playerscore += 1500; // очки за тетрис доработать!!!!
-			}
 
-			//
-			//
+		checklines(scoreplus);
 			//
 			// Вывод счета игрока через стандартную библиотеку С++
 			//
@@ -260,12 +246,7 @@ void Play(RenderWindow & window)
 		level.setPosition(118, 42);
 		window.draw(level);
 
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 				int n = rand()%7;
@@ -294,33 +275,39 @@ void Play(RenderWindow & window)
 		dx = 0;
 		rotate = 0;
 		delay = 0.5;
+
+		//система уровней
 		if (playerscore >= 1000)// level 2
 		{
 			delay = 0.4;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) {delay = 0.04;}
 			shetlevel = 2;
+			scoreplus = 120;
 		}
 
-		if (playerscore >= 2000) // level 3
+		if (playerscore >= 2100) // level 3
 		{
 			delay = 0.3;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.03;
 			shetlevel = 3;
+			scoreplus = 150;
 		}
 
-		if (playerscore >= 3000) // level 4
+		if (playerscore >= 3500) // level 4
 		{
 			shetlevel = 4;
 			delay = 0.2;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.02;
+			scoreplus = 200;
 		}
-		if (playerscore >= 4000) //bonus level 5
+		if (playerscore >= 5000) //bonus level 5
 		{
 			shetlevel = 5;
 			delay = 0.1;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
+			scoreplus = 250;
 		}
-		if (playerscore >= 5000) //bonus level 6
+		if (playerscore >= 6000) //bonus level 6
 		{
 			shetlevel = 6;
 			colorNum = 1 + rand()%7; //определение переменной сolorNumв в теле цикла вызывает мерцание тетрамин
@@ -330,70 +317,68 @@ void Play(RenderWindow & window)
 			level.setString("GOLD LEVEL");
 			window.draw(level);
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.009;
+			scoreplus = 1000;
 		}
-		if (playerscore >= 6000) //bonus level 7
+		if (playerscore >= 8500) //bonus level 7
 		{
 			shetlevel = 7;
 			delay = 0.08;
-			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.008;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.01;
+			scoreplus = 300;
 		}
-		if (playerscore >= 7000) //bonus level 8
+		if (playerscore >= 10000) //bonus level 8
 		{
 			shetlevel = 8;
 			delay = 0.07;
-			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.007;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.009;
+			scoreplus = 400;
 		}
-		if (playerscore >= 8000) //bonus level 9
+		if (playerscore >= 12000) //bonus level 9
 		{
 			shetlevel = 9;
 			delay = 0.06;
-			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.006;
+			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.008;
+			scoreplus = 500;
 		}		
-		if (playerscore >= 9000) //bonus level 10
+		if (playerscore >= 15000) //bonus level 10
 		{
 			shetlevel = 10;
 			delay = 0.05;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.007;
+			scoreplus = 600;
 		}
-		if (playerscore >= 10000) //bonus level 11
+		if (playerscore >= 17000) //bonus level 11
 		{
 			shetlevel = 11;
 			delay = 0.04;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.006;
+			scoreplus = 700;
 		}
-		if (playerscore >= 11000) //bonus level 12
+		if (playerscore >= 20000) //bonus level 12
 		{
 			shetlevel = 12;
 			delay = 0.03;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.005;
+			scoreplus = 800;
 		}
-		if (playerscore >= 12000) //bonus level 13
+		if (playerscore >= 25000) //bonus level 13
 		{
 			shetlevel = 13;
 			delay = 0.02;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.004;
+			scoreplus = 900;
 		}
-		if (playerscore >= 13000) //bonus level 14
+		if (playerscore >= 30000) //bonus level 14
 		{
 			shetlevel = 14;
 			delay = 0.01;
 			if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.003;
+			scoreplus = 1000;
 		}				
 		window.clear(Color::White);
-		window.draw(z);
 		window.draw(c);
 
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////////////
 
 		Draw(window, s);
 
@@ -416,22 +401,13 @@ void Play(RenderWindow & window)
 			window.draw(gameover);
 			Record(window, playerscore);
 			window.display();
-
 		}
-
-
 	}
 	int n;
 	cout << "GAME OVER!" << endl;
 	cout << "You score: " << playerscore << endl;
 	std::cin >> n;
-
 }
-
-
-
-
-
 
 void menu(RenderWindow & window) {
 
@@ -443,24 +419,21 @@ void menu(RenderWindow & window) {
 	Texture viewlevel;
 
 	play.loadFromFile("images/buttonmenu.png");
-	license.loadFromFile("images/buttonmenu.png");
 	shotdown.loadFromFile("images/buttonmenu.png");
 	menuBackground.loadFromFile("images/frame9ps.png");
-	viewlevel.loadFromFile("images/metatiles.png");
 
 	Font fontplay;
 	fontplay.loadFromFile("CyrilicOld.TTF");
 	Text textplay("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	Text textlicense("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
-	Text textshotdown("", fontplay, 20);//создаем объект текст. закидываем в объект текст строку, шрифт, размер шрифта(в пикселях);//сам объект текст (не строка)
+	Text textlicense("", fontplay, 20);
+	Text textshotdown("", fontplay, 20);
 	textplay.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
-	textlicense.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
-	textshotdown.setStyle(sf::Text::Bold | sf::Text::Underlined);//жирный и подчеркнутый текст. по умолчанию он "худой":)) и не подчеркнутый
+	textlicense.setStyle(sf::Text::Bold | sf::Text::Underlined);
+	textshotdown.setStyle(sf::Text::Bold | sf::Text::Underlined);
 
 
 
 	Sprite p(play); 
-	Sprite lic(license); 
 	Sprite shot(shotdown); 
 	Sprite menuBg(menuBackground);
 	Sprite lev(viewlevel);
@@ -468,9 +441,8 @@ void menu(RenderWindow & window) {
 	bool isMenu = 1;
 	int menuNum = 0;
 
-		textplay.setString("Play");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-		textshotdown.setString("Exit");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
-		textlicense.setString("License");//задаем строку тексту и вызываем сформированную выше строку методом .str() 
+		textplay.setString("Play");//задаем строку тексту и вызываем строку методом .str() 
+		textshotdown.setString("Exit");
 		textplay.setPosition(140, 187);
 		textlicense.setPosition(120, 257);
 		textshotdown.setPosition(140, 327);
@@ -478,8 +450,7 @@ void menu(RenderWindow & window) {
 
 
 	p.setPosition(5, 30);
-	shot.setPosition(5, 100);
-	lic.setPosition(5, 170);
+	shot.setPosition(5, 170);
 	menuBg.setPosition(0, 0);
 	lev.setPosition(5, 50);
  
@@ -488,13 +459,11 @@ void menu(RenderWindow & window) {
 	{
 		p.setColor(Color::White);
 		shot.setColor(Color::White);
-		lic.setColor(Color::White);
 		menuNum = 0;
 		window.clear();
  
 		if (IntRect(0, 200, 500, 20).contains(Mouse::getPosition(window))) {p.setColor(Color::Black); menuNum = 1; }
-		if (IntRect(0, 270, 500, 20).contains(Mouse::getPosition(window))) {shot.setColor(Color::Black); menuNum = 2; }
-		if (IntRect(0, 340, 500, 20).contains(Mouse::getPosition(window))) {lic.setColor(Color::Black); menuNum = 3; }
+		if (IntRect(0, 340, 500, 20).contains(Mouse::getPosition(window))) {shot.setColor(Color::Black); menuNum = 3; }
  
 		if (Mouse::isButtonPressed(Mouse::Left))
 		{
@@ -504,24 +473,14 @@ void menu(RenderWindow & window) {
 				Play(window); 
 				isMenu = false; 
 			}
-			if (menuNum == 2) { 
-				window.close(); 
-				isMenu = false; 
-			}
 			if (menuNum == 3)  { 
 				window.close(); 
 				isMenu = false; 
 			}
-			if (menuNum == 4)  { 
-				window.close(); 
-				isMenu = false; 
-			}
- 
 		}
  
 		window.draw(menuBg);
 		window.draw(p);
-		window.draw(lic);
 		window.draw(shot);
 		window.draw(textplay);
 		window.draw(textlicense);
@@ -532,20 +491,10 @@ void menu(RenderWindow & window) {
 }
 
 
-
-
-void License(RenderWindow & window)
-{
-	Texture backgroundsettings;
-	backgroundsettings.loadFromFile("images/backgroundsettings.png");
-
-}
-
 int main()
 {
 	srand(time(NULL));
 	RenderWindow window(VideoMode(320, 575), "The TETRIS");
 	menu(window);
-
 	return 0;
 }
