@@ -18,3 +18,5 @@
 — заполнять ряды, не заполняя сам стакан (по вертикали) как можно дольше, чтобы таким
 образом получить как можно больше очков. 
 # Как выглядит Tetris
+![Image alt](https://github.com/ShchegolevAlex/TetrisSFML/raw/dev/images/tetrisscreen.png)
+![Image alt](https://github.com/ShchegolevAlex/TetrisSFML/raw/dev/images/tetrisscreen1.png)
