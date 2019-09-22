@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +52,7 @@ void Record(RenderWindow & window ,int playerscore)
 		char buf[1];
 		string buff;
 		buff.resize(30);
-		int Record = 0;
+		// int Record = 0;
 		fstream recordlist;
 		ostringstream playerScoreRecord;
 		Font fontrecord;
@@ -87,8 +88,8 @@ void Draw(RenderWindow & window, Sprite s)
 			for (int j = 0; j < N; j++)
 			{
 				if (gamespace[i][j] == 0) continue;
-				s.setTextureRect(IntRect(gamespace[i][j]*0, 0, 18, 18));
-				s.setPosition(j * 18, i * 18);//модулирование позиции на нужное место
+				s.setTextureRect(IntRect(gamespace[i][j]*0, 0, 18, 18)); // цвет для текстур
+				s.setPosition(j * 18, i * 18);//моделирование позиции на нужное место
 				s.move(28,31);//выравнивание спрайтов 
 				window.draw(s);
 			}
@@ -132,7 +133,7 @@ void Tick(RenderWindow & window, Sprite s)
 
 void checklines(int scoreplus)//Проверка линий на заполнение
 {
-		int flag = 0;
+		// int flag = 0;
 			int k = M - 1;
 			for (int i = M - 1; i > 0; i--)
 			{
@@ -155,6 +156,10 @@ void Play(RenderWindow & window)
 	Texture tilesnext;
 	Font font;
 
+	SoundBuffer moveBuffer;//создаём буфер для звука
+	moveBuffer.loadFromFile("sound/move.ogg");//загружаем в него звук
+	Sound move_sound(moveBuffer);//создаем звук и загружаем в него звук из буфера
+
 	frame.loadFromFile("images/frame9ps.png");
 	tiles.loadFromFile("images/tilesnew.png");
 	font.loadFromFile("CyrilicOld.TTF");
@@ -172,9 +177,9 @@ void Play(RenderWindow & window)
 	Sprite tn(tilesnext);
 
 	colorNum = 1;
-	float fastplayerscore = 0;
+	// float fastplayerscore = 0;
 	int shetlevel = 1;
-	int tetrominofull = 0;
+	// int tetrominofull = 0;
 	bool rotate = 0;
 	dx = 5;
 	timer = 0, 
@@ -185,6 +190,7 @@ void Play(RenderWindow & window)
 		
 	while (window.isOpen() && check())
 	{
+		// music.setLoop(true);
 		float time = clock.getElapsedTime().asSeconds();
 		clock.restart();
 		timer += time;
@@ -197,12 +203,15 @@ void Play(RenderWindow & window)
 
 			if (e.type == Event::KeyPressed)
 				if (e.key.code == Keyboard::Up) rotate = true;
-				else if (e.key.code == Keyboard::Left) dx -= 1;
-				else if (e.key.code == Keyboard::Right) dx += 1;
+				else if (e.key.code == Keyboard::Left) {move_sound.play();dx -= 1;}
+				else if (e.key.code == Keyboard::Right){move_sound.play();dx += 1;}
 		}
 
-		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;	
-
+		if (Keyboard::isKeyPressed(Keyboard::Down)){
+			delay = 0.05;	
+			move_sound.setPlayingOffset(sf::seconds(1));
+			move_sound.play();
+}
 		// Движение
 
 		for (int i = 0; i < 4; i++)
@@ -377,6 +386,7 @@ void Play(RenderWindow & window)
 		}				
 		window.clear(Color::White);
 		window.draw(c);
+		// music.play();//воспроизводим музыку
 
 /////////////////////////////////////////////////////////////////////////////////////
 
@@ -403,10 +413,10 @@ void Play(RenderWindow & window)
 			window.display();
 		}
 	}
-	int n;
+	// int n;
 	cout << "GAME OVER!" << endl;
 	cout << "You score: " << playerscore << endl;
-	std::cin >> n;
+	// std::cin >> n;
 }
 
 void menu(RenderWindow & window) {
@@ -417,6 +427,14 @@ void menu(RenderWindow & window) {
 	Texture shotdown; 
 	Texture menuBackground;
 	Texture viewlevel;
+
+	Music music;//создаем объект музыки
+	music.openFromFile("sound/music.ogg");//загружаем файл
+	music.setVolume(100);
+
+	SoundBuffer move_button_Buffer;//создаём буфер для звука
+	move_button_Buffer.loadFromFile("sound/button_menu_sound.ogg");//загружаем в него звук
+	Sound button_sound(move_button_Buffer);//создаем звук и загружаем в него звук из буфера
 
 	play.loadFromFile("images/buttonmenu.png");
 	shotdown.loadFromFile("images/buttonmenu.png");
@@ -462,18 +480,20 @@ void menu(RenderWindow & window) {
 		menuNum = 0;
 		window.clear();
  
-		if (IntRect(0, 200, 500, 20).contains(Mouse::getPosition(window))) {p.setColor(Color::Black); menuNum = 1; }
-		if (IntRect(0, 340, 500, 20).contains(Mouse::getPosition(window))) {shot.setColor(Color::Black); menuNum = 3; }
+		if (IntRect(0, 200, 500, 20).contains(Mouse::getPosition(window))) {p.setColor(Color::Black); menuNum = 1;button_sound.play();}
+		if (IntRect(0, 340, 500, 20).contains(Mouse::getPosition(window))) {shot.setColor(Color::Black); menuNum = 3;button_sound.play();}
  
 		if (Mouse::isButtonPressed(Mouse::Left))
 		{
-			if (menuNum == 1) { 
+			button_sound.play();
+			if (menuNum == 1) {
 				window.draw(lev); 
 				window.display(); 
 				Play(window); 
 				isMenu = false; 
 			}
 			if (menuNum == 3)  { 
+				button_sound.play();
 				window.close(); 
 				isMenu = false; 
 			}
@@ -487,6 +507,8 @@ void menu(RenderWindow & window) {
 		window.draw(textshotdown);
 		
 		window.display();
+		music.play();
+		music.setLoop(true);
 	}
 }
 
@@ -495,6 +517,10 @@ int main()
 {
 	srand(time(NULL));
 	RenderWindow window(VideoMode(320, 575), "The TETRIS");
+	Music music_start_game;//создаем объект музыки
+	music_start_game.openFromFile("sound/start_game.ogg");//загружаем файл
+	music_start_game.setVolume(10);
+	music_start_game.play();
 	menu(window);
 	return 0;
 }
