@@ -4,7 +4,7 @@ CFLAGS=-c -Wall -lsfml-graphics -lsfml-window -lsfml-system -std=c++17
 # LDFLAGS = 
 # OBJECTS = $(SOURCES:.cpp=.o)
 TETRIS:
-	$(CC) -Wall main.cpp -o TETRIS -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+	$(CC) -Wall main.cpp -o TETRIS.exe -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
 
 # CC=g++
 # CFLAGS=-c -Wall -lsfml-graphics -lsfml-window -lsfml-system -std=c++17
