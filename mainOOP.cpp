@@ -35,10 +35,10 @@ protected:
 
 	int 						x;
 	int 						y;
-	int	playerscore;
-	float delay;
-	int	shetlevel;
-	int	scoreplus;
+	int							playerscore;
+	float 						delay;
+	int							shetlevel;
+	int							scoreplus;
 
 	
 	bool 						check();// границы
@@ -56,7 +56,7 @@ protected:
 
 }tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
 
-Control::Control(){
+Control::Control(): delay(0.3), shetlevel(1){ // инициализатор переменных класса(списки инициализации)
 
 }
 Control::~Control(){
@@ -65,7 +65,10 @@ Control::~Control(){
 
 class outRecord {
 public:
-	outRecord(string name){
+	outRecord(string name){ // перегрузка конструктора
+		this->name = name;
+	}
+	outRecord(char name){
 		this->name = name;
 	}
 	string getNamePlayer(){
@@ -102,21 +105,45 @@ protected:
 
 };
 
+class Figures{
+public:
+	virtual int Axis() = 0;
+	int figures[7][4] = 
+		{
+			1,3,5,7,
+			2,4,5,7,
+			3,5,4,6,
+			3,5,4,7,
+			2,3,5,7,
+			3,5,7,6,
+			2,3,4,5,
+		};
+protected:
+
+};
+
+class Tetromino : public Figures{
+public:
+	int Axis(){
+		return figures[7][4];
+	}
+};
+
 // struct Control
 // 	{
 // 		int x, y;
 // 	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
 
-int figures[7][4] = 
-{
-	1,3,5,7,
-	2,4,5,7,
-	3,5,4,6,
-	3,5,4,7,
-	2,3,5,7,
-	3,5,7,6,
-	2,3,4,5,
-};
+// int figures[7][4] = 
+// {
+// 	1,3,5,7,
+// 	2,4,5,7,
+// 	3,5,4,6,
+// 	3,5,4,7,
+// 	2,3,5,7,
+// 	3,5,7,6,
+// 	2,3,4,5,
+// };
 
 // friend void Control::Start(RenderWindow &menuwindow){
 // 	menu(menuwindow);
@@ -192,6 +219,7 @@ void Control::Draw(RenderWindow & window, Sprite s)
 
 void Control::Tick(RenderWindow & window, Sprite s)
 {
+	Tetromino figure;
 		if (timer > delay)
 		{
 			for (int i = 0; i < 4; i++) 
@@ -207,8 +235,8 @@ void Control::Tick(RenderWindow & window, Sprite s)
 				int n = rand()%7;
 				for (int i = 0; i < 4; i++)
 				{
-					tetrominofirst[i].x = figures[n][i] % 2;
-					tetrominofirst[i].y = figures[n][i] / 2;
+					tetrominofirst[i].x = figure.figures[n][i] % 2;
+					tetrominofirst[i].y = figure.figures[n][i] / 2;
 				}
 			}
 			timer = 0;
@@ -273,11 +301,13 @@ void Control::Play(RenderWindow & window)
 
 	Sprite s(tiles);
 
+	// Sprite ss(tiles);
+
 	Sprite tn(tilesnext);
 
 	colorNum = 1;
 	// float fastplayerscore = 0;
-	shetlevel = 1;
+	// shetlevel = 1;
 	playerscore = 0;
 	// int tetrominofull = 0;
 	bool rotate = 0;
@@ -286,6 +316,9 @@ void Control::Play(RenderWindow & window)
 	delay = 0.3;
 	scoreplus = 100;
 
+	int shetrand;
+
+	Tetromino figure;
 
 	Clock clock;
 		
@@ -359,26 +392,28 @@ void Control::Play(RenderWindow & window)
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+				shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 				int n = rand()%7;
-				int shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
+				// shetrand = rand()%7; //прописать счетчик для рандомных чисел для отображения следующей тетраминки
 				if (tempb[0].x == 0 && tempb[0].y == 0)
 				{
 					for (int i = 0; i < 4; i++)
 					{
 						// shetrand = n;
-						tetrominofirst[i].x = figures[n][i] % 2;
-						tetrominofirst[i].y = figures[n][i] / 2;
+						tetrominofirst[i].x = figure.figures[n][i] % 2;
+						tetrominofirst[i].y = figure.figures[n][i] / 2;
 						tempa[i].x = tetrominofirst[i].x;
 						tempa[i].y = tetrominofirst[i].y;
 					}
-					n = shetrand;
+					// n = shetrand;
 					for (int i = 0; i < 4; i++)
 					{
-						tetrominofirst[i].x = figures[shetrand][i] % 2;
-						tetrominofirst[i].y = figures[shetrand][i] / 2;
+						tetrominofirst[i].x = figure.figures[shetrand][i] % 2;
+						tetrominofirst[i].y = figure.figures[shetrand][i] / 2;
 						tempb[i].x = tetrominofirst[i].x;
 						tempb[i].y = tetrominofirst[i].x;
 					}
+					// n = shetrand;
 				}
 
 		window.display();
