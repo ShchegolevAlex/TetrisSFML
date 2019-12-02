@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 // Инкапсуляция (все поля данных не доступны из внешних функций)
 // Наследование (минимум 3 класса, один из которых - абстрактный)
 // Полиморфизм
@@ -18,20 +19,93 @@ using namespace std;
 
 const int M = 30;
 const int N = 14;
-int playerscore = 0;
 int colorNum;
 float timer;
-float delay;
 int dx;
 
 const int random (int N) {return rand()%7;}
 
 int gamespace[M][N] = {0};
 
-struct Point
-	{
-		int x, y;
-	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
+class Control {
+public:
+								Control();//int	playerscore, float delay, int shetlevel, int scoreplus
+								~Control();
+protected:
+
+	int 						x;
+	int 						y;
+	int	playerscore;
+	float delay;
+	int	shetlevel;
+	int	scoreplus;
+
+	
+	bool 						check();// границы
+	void 						getRecord(RenderWindow & window ,int playerscore);
+	void 						Draw(RenderWindow & window, Sprite s);
+	void 						Tick(RenderWindow & window, Sprite s);
+	void 						checklines(int scoreplus);//Проверка линий на заполнение
+	void 						checklines(long scoreplus);//Проверка линий на заполнение перегрузка функции
+	void 						Play(RenderWindow & window);
+	void 						menu(RenderWindow & window);
+	
+	friend void Start(RenderWindow &menuwindow, Control &p){
+		p.menu(menuwindow);
+	}
+
+}tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
+
+Control::Control(){
+
+}
+Control::~Control(){
+
+}
+
+class outRecord {
+public:
+	outRecord(string name){
+		this->name = name;
+	}
+	string getNamePlayer(){
+		std::ostringstream full_name;
+            full_name << " "
+                << this->name << " ";
+            return full_name.str();
+	}
+protected:
+	string name;
+
+};
+
+class Score : public outRecord {
+public:
+	// Конструктор класса Score
+        Score(string name, std::vector<int> scores) : outRecord(name){
+            this->scores = scores;
+        }
+        char get_score()
+        {
+			char buf[100];
+			fstream recordlist;
+			recordlist.open("Recordlist.txt");
+			recordlist >> buf;
+			recordlist.close();
+			
+
+			return *buf;
+        }
+
+protected:
+	std::vector<int> scores;
+
+};
+
+// struct Control
+// 	{
+// 		int x, y;
+// 	} tetrominofirst[4], tetrominosecond[4], tempa[4], tempb[4];
 
 int figures[7][4] = 
 {
@@ -44,7 +118,11 @@ int figures[7][4] =
 	2,3,4,5,
 };
 
-bool check()// границы
+// friend void Control::Start(RenderWindow &menuwindow){
+// 	menu(menuwindow);
+// }
+
+bool Control::check()// границы
 {
 	for (int i = 0; i < 4; i++)
 		if (tetrominofirst[i].x < 0 || tetrominofirst[i].x >= N || tetrominofirst[i].y >= M) return 0;
@@ -52,7 +130,7 @@ bool check()// границы
 	return 1;
 }
 
-void Record(RenderWindow & window ,int playerscore)
+void Control::getRecord(RenderWindow & window ,int playerscore)
 {
 		char buf[1];
 		string buff;
@@ -82,11 +160,12 @@ void Record(RenderWindow & window ,int playerscore)
 		record.setString("Record:" + playerScoreRecord.str());
 		record.setPosition(120,320);
 		window.draw(record);
+		// return playerScoreRecord.str();
 }
 
-void Draw(RenderWindow & window, Sprite s)
+void Control::Draw(RenderWindow & window, Sprite s)
 {
-		//
+		//Record
 		// Отрисовка тетрамин лежащих на дне колодца
 		//
 			for (int i = 0; i < M; i++)
@@ -111,7 +190,7 @@ void Draw(RenderWindow & window, Sprite s)
 }
 
 
-void Tick(RenderWindow & window, Sprite s)
+void Control::Tick(RenderWindow & window, Sprite s)
 {
 		if (timer > delay)
 		{
@@ -136,7 +215,23 @@ void Tick(RenderWindow & window, Sprite s)
 		}
 }
 
-void checklines(int scoreplus)//Проверка линий на заполнение
+void Control::checklines(int scoreplus)//Проверка линий на заполнение
+{
+		// int flag = 0;
+			int k = M - 1;
+			for (int i = M - 1; i > 0; i--)
+			{
+				int count = 0;
+				for (int j = 0; j < N; j++)
+				{
+					if (gamespace[i][j]) count++;
+					gamespace[k][j] = gamespace[i][j];
+				}
+				if (count < N) k--;
+				if (count == N) playerscore += scoreplus;
+			}
+}
+void Control::checklines(long scoreplus)//Проверка линий на заполнение
 {
 		// int flag = 0;
 			int k = M - 1;
@@ -153,8 +248,7 @@ void checklines(int scoreplus)//Проверка линий на заполне�
 			}
 }
 
-
-void Play(RenderWindow & window)
+void Control::Play(RenderWindow & window)
 {
 	Texture tiles;
 	Texture frame;
@@ -183,13 +277,15 @@ void Play(RenderWindow & window)
 
 	colorNum = 1;
 	// float fastplayerscore = 0;
-	int shetlevel = 1;
+	shetlevel = 1;
+	playerscore = 0;
 	// int tetrominofull = 0;
 	bool rotate = 0;
 	dx = 5;
 	timer = 0, 
 	delay = 0.3;
-	int scoreplus = 100;
+	scoreplus = 100;
+
 
 	Clock clock;
 		
@@ -230,7 +326,7 @@ void Play(RenderWindow & window)
 
 		if (rotate == true)
 		{
-			Point p = tetrominofirst[1]; // центр вращения фигуры
+			Control p = tetrominofirst[1]; // центр вращения фигуры
 			for (int i = 0; i < 4; i++)// реализация поворота
 			{
 				int x = tetrominofirst[i].y - p.y;
@@ -412,19 +508,24 @@ void Play(RenderWindow & window)
 			gameover.setString("GAME OVER");
 			gameover.setPosition(90,250);
 			score.setPosition(120,285);
+			std::vector<int> scores;
+			scores.push_back(playerscore);
+			Score *outrec = new Score("Алексей",scores);
+			std::cout << outrec->getNamePlayer() << endl;
 			window.draw(score);
 			window.draw(gameover);
-			Record(window, playerscore);
+			getRecord(window, playerscore);//////////////////////////////////////////////////////////////////////////////////////////////
 			window.display();
 		}
 	}
-	// int n;
+	int n;
 	cout << "GAME OVER!" << endl;
 	cout << "You score: " << playerscore << endl;
-	// std::cin >> n;
+
+	cin >> n;
 }
 
-void menu(RenderWindow & window) {
+void Control::menu(RenderWindow & window) {
 
 	Texture play;
 	Texture settings; 
@@ -521,11 +622,14 @@ void menu(RenderWindow & window) {
 int main()
 {
 	srand(time(NULL));
+	Control start;
 	RenderWindow window(VideoMode(320, 575), "The TETRIS");
 	Music music_start_game;//создаем объект музыки
 	music_start_game.openFromFile("sound/start_game.ogg");//загружаем файл
 	music_start_game.setVolume(10);
 	music_start_game.play();
-	menu(window);
+
+	Start(window, start);
+	// menu(window);
 	return 0;
 }
